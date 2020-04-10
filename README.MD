@@ -12,13 +12,17 @@
   * **resource-manager.db** - sqlite database file
 
 #### Installation
-Enter to project directory and add dir:
+Enter to project directory and add dir:<br/>
 `mkdir venv`<br/>
-Then run:
+
+Then run:<br/>
 `python3 -m venv venv`<br/>
-Install Python PIP (OS X):
+
+Install Python PIP (OS X):<br/>
 `sudo easy_install pip`<br/>
-Install Flask:
+
+Install Flask:<br/>
 `python3 -m pip install Flask`<br/>
-Install Flask-SQLAlchemy:
+
+Install Flask-SQLAlchemy:<br/>
 `python3 -m pip install Flask-SQLAlchemy`<br/>
