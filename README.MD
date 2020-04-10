@@ -10,3 +10,16 @@
   * **models.py** - file with database models (tables)
   * **views.py** - file contains routes with views, like "/" or "/login" 
   * **resource-manager.db** - sqlite database file
+
+#### Installation
+Enter to project directory and add dir:
+`mkdir venv`
+
+Then run:
+`python3 -m venv venv`
+
+Install Flask:
+`python3 -m pip install Flask`
+
+Install Flask-SQLAlchemy
+`python3 -m pip install Flask-SQLAlchemy`
