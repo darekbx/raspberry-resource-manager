@@ -13,13 +13,12 @@
 
 #### Installation
 Enter to project directory and add dir:
-`mkdir venv`
-
+`mkdir venv`<br/>
 Then run:
-`python3 -m venv venv`
-
+`python3 -m venv venv`<br/>
+Install Python PIP (OS X):
+`sudo easy_install pip`<br/>
 Install Flask:
-`python3 -m pip install Flask`
-
-Install Flask-SQLAlchemy
-`python3 -m pip install Flask-SQLAlchemy`
+`python3 -m pip install Flask`<br/>
+Install Flask-SQLAlchemy:
+`python3 -m pip install Flask-SQLAlchemy`<br/>
