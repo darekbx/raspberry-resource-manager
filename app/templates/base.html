@@ -1,11 +1,25 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>Resource Manager</title>
-</head>
-<body>
-	Header
-	{% block content %}{% endblock %}
-	Footer
-</body>
-</html>
+{% extends 'bootstrap/base.html' %}
+
+{% block title %}
+    Resource Manager
+{% endblock %}
+
+{% block navbar %}
+    <nav class="navbar navbar-default">
+        ... navigation bar here (see complete code on GitHub) ...
+    </nav>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-info" role="alert">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        {% block app_content %}{% endblock %}
+    </div>
+{% endblock %}
