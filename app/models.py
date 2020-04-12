@@ -1,4 +1,5 @@
 from app import db
+import hashlib
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -6,8 +7,8 @@ class User(db.Model):
     password = db.Column(db.String(256), nullable=False)
 
     def verify_password(self, password):
-        # TODO: store password as hash and compare hashes
-        return self.password == password
+        password_md5 = hashlib.md5(password.encode())
+        return self.password == password_md5.hexdigest()
  
     def is_authenticated(self):
         return True
