@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
-	<h3>
-	Numer of the users in db: {{ name }}
-	</h3>
+<ul>	
+{% for file in content %}
+	<li>{{file}}</li>
+{% endfor %}
+</ul>
 {% endblock %}

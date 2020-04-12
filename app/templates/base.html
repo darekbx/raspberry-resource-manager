@@ -10,7 +10,7 @@
 		<div class="navbar-inner">
 			{% if current_user.is_authenticated %}
 			<ul class="nav  pull-right" >
-				<li><a href="/logout">Logout <b>{{current_user.name}}</b></a></li>
+				<li><a href="/logout">Logout (<b>{{current_user.name}}</b>)</a></li>
 				<li><a href="/settings">Settings</a></li>
 			</ul>
 			{% endif %}

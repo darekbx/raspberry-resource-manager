@@ -4,13 +4,19 @@ from app import models, login_manager, db
 from flask import g, render_template, redirect
 from flask_login import current_user, login_user, logout_user, login_required
 
+import os
+from os.path import expanduser
 import hashlib
 
 @app.route('/')
+@app.route('/dir/<dir>')
 @login_required
-def index():
-	users = models.User.query.all()
-	return render_template('index.html', name="{0}".format(len(users)))
+def index(dir = None):
+	parent_directory = expanduser("~") + app.config['RESOURCES-DIRECTORY']
+	if dir is None:
+		dir = "/"
+	content = os.listdir(parent_directory + dir)
+	return render_template('index.html', content = content)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -21,6 +27,11 @@ def load_user(user_id):
 def logout():
     logout_user()
     return redirect("/login")
+
+@app.route("/settings")
+@login_required
+def settings():
+	return "TODO"
 
 @app.route('/login', methods=["GET", "POST"])
 def login():
@@ -39,7 +50,8 @@ def login():
 
 @app.route('/register', methods=["GET", "POST"])
 def register():
-	if models.User.query.first() is None:
+	one_user = app.config['ONE_USER']
+	if not one_user or models.User.query.count() == 0:
 		form = RegisterForm()
 		if form.validate_on_submit():
 			name = form.name.data
