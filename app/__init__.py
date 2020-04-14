@@ -15,6 +15,10 @@ bootstrap = Bootstrap(app)
 db = SQLAlchemy(app)
 login_manager = LoginManager()
 
+from app.models import User
+db.create_all()
+db.session.commit()
+
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
