@@ -1,8 +1,22 @@
 {% extends "base.html" %}
 {% block content %}
-<ul>	
-{% for file in content %}
-	<li>{{file}}</li>
+<table class="table">
+	<thead>
+	   <tr>
+		<th>File Name</th>
+		<th>Date of modification</th>
+		<th>File size</th>
+	   </th>
+	</thead>
+<tbody>	
+
+{% for row in content %}
+<tr>
+	<td>{{row[0]}}</td>
+	<td>{{row[1]}}</td>
+	<td>{{row[2]}}</td>
+</tr>
 {% endfor %}
-</ul>
+
+</tbody>
 {% endblock %}
