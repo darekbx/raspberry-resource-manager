@@ -141,3 +141,8 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 .vscode/settings.json
+resources-manager-files/Nowy dokument tekstowy.txt
+resources-manager-files/Nowy folder skompresowany (zip).zip
+configuration.json
+.gitignore
+configuration.json
