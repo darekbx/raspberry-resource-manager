@@ -1,8 +1,0 @@
-{
-	"DEBUG": true,
-	"ONE_USER": true,
-	"RESOURCES-DIRECTORY": "\\Desktop\\rpi\\raspberry-resource-manager\\resources-manager-files",
-	"SQLALCHEMY_DATABASE_URI": "sqlite:///resource-manager.db",
-	"SQLALCHEMY_TRACK_MODIFICATIONS": false,
-	"SECRET_KEY": "dummy_secret"
-}
