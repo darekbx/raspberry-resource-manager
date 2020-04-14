@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
-	<br />
-	Index inside block, name: {{ name }}!
-	<br />
+<ul>	
+{% for file in content %}
+	<li>{{file}}</li>
+{% endfor %}
+</ul>
 {% endblock %}

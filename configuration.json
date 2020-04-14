@@ -1,6 +1,8 @@
 {
 	"DEBUG": true,
-	"RESOURCES-DIRECTORY": "/resource-manager-files",
+	"ONE_USER": true,
+	"RESOURCES-DIRECTORY": "/resources-manager-files",
 	"SQLALCHEMY_DATABASE_URI": "sqlite:///resource-manager.db",
-	"SQLALCHEMY_TRACK_MODIFICATIONS": false
+	"SQLALCHEMY_TRACK_MODIFICATIONS": false,
+	"SECRET_KEY": "dummy_secret"
 }
