@@ -3,10 +3,19 @@ from app.forms import LoginForm, RegisterForm
 from app import models, login_manager, db
 from flask import g, render_template, redirect
 from flask_login import current_user, login_user, logout_user, login_required
+from dateutil.parser import parse
 
+import time, datetime as dt
 import os
 from os.path import expanduser
 import hashlib
+
+def sizeof_fmt(num, suffix='B'):
+    for unit in ['','Ki','Mi','Gi','Ti','Pi','Ei','Zi']:
+        if abs(num) < 1024.0:
+            return "%3.1f%s%s" % (num, unit, suffix)
+        num /= 1024.0
+    return "%.1f%s%s" % (num, 'Yi', suffix)
 
 @app.route('/')
 @app.route('/dir/<dir>')
@@ -15,8 +24,16 @@ def index(dir = None):
 	parent_directory = expanduser("~") + app.config['RESOURCES-DIRECTORY']
 	if dir is None:
 		dir = "/"
-	content = os.listdir(parent_directory + dir)
-	return render_template('index.html', content = content)
+	file_details = []
+	parent_dir = parent_directory + dir
+	files_in_directory = os.listdir(parent_dir)
+
+	for file_name in files_in_directory:
+		dt = parse(str(time.ctime(os.path.getmtime(parent_dir + file_name))))
+		parsed_date = dt.strftime('%Y-%m-%d %H:%M:%S')
+		file_size = os.stat(parent_dir + file_name).st_size
+		file_details.append([file_name, str(parsed_date), sizeof_fmt(file_size)])
+	return render_template('index.html', content = file_details)
 
 @login_manager.user_loader
 def load_user(user_id):
