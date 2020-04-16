@@ -18,14 +18,11 @@ def sizeof_fmt(num, suffix='B'):
         num /= 1024.0
     return "%.1f%s%s" % (num, 'Yi', suffix)
 
-@app.route('/download/<path:filename>', methods=['GET', 'POST'])
-def download(filename, dir = None):
+@app.route('/download/<filename>')
+def download_file(filename):
 	parent_directory = expanduser("~") + app.config['RESOURCES-DIRECTORY']
-	if dir is None:
-		dir = "/"
-	file_path = parent_directory + dir 
-	file_to_download = file_path + filename  #file path including filename
-	return send_file(file_to_download)
+	file_to_download = parent_directory + '/' + filename  #file path including filename
+	return send_file(file_to_download, as_attachment=True)
 
 @app.route('/')
 @app.route('/dir/<dir>')
