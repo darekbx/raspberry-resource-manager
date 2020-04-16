@@ -1,7 +1,8 @@
 from app import app
 from app.forms import LoginForm, RegisterForm
 from app import models, login_manager, db
-from flask import g, render_template, redirect
+from flask import g, render_template, redirect 
+from flask import send_file
 from flask_login import current_user, login_user, logout_user, login_required
 from dateutil.parser import parse
 
@@ -16,6 +17,17 @@ def sizeof_fmt(num, suffix='B'):
             return "%3.1f%s%s" % (num, unit, suffix)
         num /= 1024.0
     return "%.1f%s%s" % (num, 'Yi', suffix)
+
+@app.route('/download')
+@app.route('/dir/<dir>')
+@login_required
+def file_download(file_to_download, dir = None):
+	parent_directory = expanduser("~") + app.config['RESOURCES-DIRECTORY']
+	if dir is None:
+		dir = "/"
+	parent_dir = parent_directory + dir
+	path = parent_dir + file_to_download
+	return send_file(path)
 
 @app.route('/')
 @app.route('/dir/<dir>')
