@@ -7,7 +7,7 @@ from flask_login import current_user, login_user, logout_user, login_required
 from dateutil.parser import parse
 
 import time, datetime as dt
-import os
+import os, shutil, stat
 from os.path import expanduser
 import hashlib
 
@@ -23,6 +23,27 @@ def download_file(filename):
 	parent_directory = expanduser("~") + app.config['RESOURCES-DIRECTORY']
 	file_to_download = parent_directory + '/' + filename  #file path including filename
 	return send_file(file_to_download, as_attachment=True)
+
+	
+
+@app.route('/delete_item/<filename>')
+@login_required
+def delete_item(filename):
+	parent_directory = expanduser("~") + app.config['RESOURCES-DIRECTORY'] + "/"
+	file_to_remove = os.path.join(parent_directory, filename)
+	is_file = os.path.isfile(file_to_remove)
+	if is_file:
+		os.chmod(file_to_remove, stat.S_IWRITE)
+		os.remove(file_to_remove)
+	else:
+		dir_to_remove = file_to_remove
+		files_in_directory_to_remove = os.listdir(dir_to_remove)
+
+		for file_chmod in files_in_directory_to_remove:
+			os.chmod(dir_to_remove + "/" + file_chmod, stat.S_IWRITE)
+		shutil.rmtree(dir_to_remove, ignore_errors=True)
+
+	return redirect("/")
 
 @app.route('/')
 @app.route('/dir/<dir>')
