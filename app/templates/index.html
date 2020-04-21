@@ -13,7 +13,7 @@
 
 {% for row in content %}
 <tr>
-	<td>{{row[0]}}</td>
+	<td><a href="/dir/{{row[0]}}">{{row[0]}}</a></td>
 	<td><a href="{{ url_for('download_file', filename=row[0]) }}"><img src="https://img.icons8.com/metro/15/000000/download.png"/></a>
 		<a href="{{ url_for('delete_item', filename=row[0]) }}"><img src="https://img.icons8.com/ios-glyphs/20/000000/delete-forever.png"/></a>
 	</td>
