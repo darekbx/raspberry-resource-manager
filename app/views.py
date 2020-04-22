@@ -18,11 +18,10 @@ def sizeof_fmt(num, suffix='B'):
         num /= 1024.0
     return "%.1f%s%s" % (num, 'Yi', suffix)
 
-@app.route('/download/<filename>')
-def download(filename):
-	parent_directory = expanduser("~") + app.config['RESOURCES-DIRECTORY']
-	file_to_download = parent_directory + filename  #file path including filename
-	return send_file(file_to_download, as_attachment=True)
+@app.route('/download/<path:dir>')
+def download(dir):
+	absolute_dir = expanduser("~") + app.config['RESOURCES-DIRECTORY']
+	return send_file(os.path.join(absolute_dir, dir) , as_attachment=True)
 
 @app.route('/')
 @app.route('/dir/')
@@ -53,7 +52,7 @@ def index(dir = ""):
 			"name": file_name, 
 			"date": str(parsed_date), 
 			"size": sizeof_fmt(file_size),
-			"is_dir":  os.path.isdir(path),
+			"is_dir": os.path.isdir(path),
 			"path": os.path.join(dir, file_name)
 		})
 

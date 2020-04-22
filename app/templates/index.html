@@ -21,7 +21,7 @@
 	{% else %}
 		<td>{{row['name']}}</td>
 		<td width="20%">
-			<a href="{{ url_for('download', filename=row['path']) }}">Download</a>
+			<a href="{{ url_for('download', dir=row['path']) }}">Download</a>
 		</td>	
 		<td width="10%">{{row['date']}}</td>
 		<td width="10%">{{row['size']}}</td>
