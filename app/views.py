@@ -18,31 +18,46 @@ def sizeof_fmt(num, suffix='B'):
         num /= 1024.0
     return "%.1f%s%s" % (num, 'Yi', suffix)
 
-@app.route('/download/<path:filename>', methods=['GET', 'POST'])
-def download(filename, dir = None):
-	parent_directory = expanduser("~") + app.config['RESOURCES-DIRECTORY']
-	if dir is None:
-		dir = "/"
-	file_path = parent_directory + dir 
-	file_to_download = file_path + filename  #file path including filename
-	return send_file(file_to_download)
+@app.route('/download/<path:dir>')
+def download(dir):
+	absolute_dir = expanduser("~") + app.config['RESOURCES-DIRECTORY']
+	return send_file(os.path.join(absolute_dir, dir) , as_attachment=True)
 
 @app.route('/')
-@app.route('/dir/<dir>')
+@app.route('/dir/')
+@app.route('/dir/<path:dir>')
 @login_required
-def index(dir = None):
-	parent_directory = expanduser("~") + app.config['RESOURCES-DIRECTORY']
-	if dir is None:
-		dir = "/"
+def index(dir = ""):
+	absolute_dir = expanduser("~") + app.config['RESOURCES-DIRECTORY'] + "/" + dir
+	
 	file_details = []
-	parent_dir = parent_directory + dir
-	files_in_directory = os.listdir(parent_dir)
+	files_in_directory = os.listdir(absolute_dir)
+
+	if dir != "": 
+		head, tail = os.path.split(dir)
+		file_details.append({
+			"name": "..", 
+			"date": "", 
+			"size": "",
+			"is_dir": True,
+			"path": head
+		})
 
 	for file_name in files_in_directory:
-		dt = parse(str(time.ctime(os.path.getmtime(parent_dir + file_name))))
+		path = os.path.join(absolute_dir, file_name)
+		dt = parse(str(time.ctime(os.path.getmtime(path))))
 		parsed_date = dt.strftime('%Y-%m-%d %H:%M:%S')
-		file_size = os.stat(parent_dir + file_name).st_size
-		file_details.append([file_name, str(parsed_date), sizeof_fmt(file_size)])
+		file_size = os.stat(path).st_size
+		file_details.append({
+			"name": file_name, 
+			"date": str(parsed_date), 
+			"size": sizeof_fmt(file_size),
+			"is_dir": os.path.isdir(path),
+			"path": os.path.join(dir, file_name)
+		})
+
+	file_details.sort(key=lambda item: item['is_dir'], reverse=True)
+
 	return render_template('index.html', content = file_details)
 
 @login_manager.user_loader
