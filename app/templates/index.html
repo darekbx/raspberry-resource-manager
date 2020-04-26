@@ -1,10 +1,12 @@
 {% extends "base.html" %}
+
 {% block content %}
+
 <table class="table">
 	<thead>
 	   <tr>
 		<th>File Name</th>
-		<th></th>
+		<th>Action</th>
 		<th>Date of modification</th>
 		<th>File size</th>
 	   </th>
@@ -13,15 +15,51 @@
 
 {% for row in content %}
 <tr>
-	<td><a href="/dir/{{row[0]}}">{{row[0]}}</a></td>
-	<td><a href="{{ url_for('download_file', filename=row[0]) }}"><img src="https://img.icons8.com/metro/15/000000/download.png"/></a>
-		<a href="{{ url_for('delete_item', filename=row[0]) }}"><img src="https://img.icons8.com/ios-glyphs/20/000000/delete-forever.png"/></a>
-	</td>
-	<td>{{row[1]}}</td>
-	<td>{{row[2]}}</td>
-</tr>
-{% endfor %}
+	{% if row['is_dir'] %}
+		<td><a href="/dir/{{ row['path'] }}">{{row['name']}}</a></td>
+		<td width="1%"></td>
+		<td width="10%">{{row['date']}}</td>
+		<td width="10%"></td>
+	{% else %}
+		<td>{{row['name']}}</td>
+		<td width="20%">
+			<a href="{{ url_for('download', dir=row['path']) }}"><img src="https://img.icons8.com/metro/13/000000/download.png"/></a>
+			<a href="{{ url_for('delete_item', filename=row['path']) }}"><img src="https://img.icons8.com/ios-glyphs/18/000000/delete-forever.png"/></a>
+		</td>	
+		<td width="10%">{{row['date']}}</td>
+		<td width="10%">{{row['size']}}</td>
+	{% endif %}
+
+	{% endfor %}
 
 </tbody>
 </table>
+
+<form class="form-inline center-block" action = "http://localhost:8090/upload" method = "POST" enctype = "multipart/form-data">	
+		<div id = "divID" class="input-group">
+			<label id="browsebutton" class="btn btn-default input-group-addon" style="background-color:white">
+				<input id="file-selector" type="file" style="display:none;" name="file" onchange="$('#upload-file-info').val(this.files[0].name)">
+				Browse...
+			</label>
+			<input type="text" id="upload-file-info" class="form-control" readonly="">	
+			<input type = "hidden" name = dir_to_upload value = "{{ current_dir }}" />
+		</div>
+		<button type = "submit" class="btn btn-primary"> Upload </button>
+</form>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+	{% if messages %}
+		{% for category, message in messages %}
+		<div id="alert" class="alert alert-{{ category }}">
+			{{ message }}
+	</div>
+		{% endfor %}
+	{% endif %}
+{% endwith %}
+
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='js/upload.js') }}" ></script>
 {% endblock %}

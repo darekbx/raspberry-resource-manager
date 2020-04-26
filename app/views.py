@@ -1,69 +1,121 @@
 from app import app
-
-from os.path import expanduser #remove
-
 from app.forms import LoginForm, RegisterForm
 from app import models, login_manager, db
-from flask import g, render_template, redirect 
-from app.file_utils import FileUtils
-
+from flask import g, render_template, redirect , request, flash
+from flask import send_file
 from flask_login import current_user, login_user, logout_user, login_required
 from dateutil.parser import parse
+from werkzeug.utils import secure_filename
+
 
 import time, datetime as dt
-import os, shutil, stat #to remove
-
+import os, shutil, stat
+from os.path import expanduser
 import hashlib
 
-file_utils = FileUtils()
+def sizeof_fmt(num, suffix='B'):
+    for unit in ['','Ki','Mi','Gi','Ti','Pi','Ei','Zi']:
+        if abs(num) < 1024.0:
+            return "%3.1f%s%s" % (num, unit, suffix)
+        num /= 1024.0
+    return "%.1f%s%s" % (num, 'Yi', suffix)
+
+@app.route('/download/<path:dir>')
+def download(dir):
+	absolute_dir = expanduser("~") + app.config['RESOURCES-DIRECTORY']
+	return send_file(os.path.join(absolute_dir, dir) , as_attachment=True)
 
 
-
-@app.route('/download/<filename>')
-@login_required
-def download_file(filename):
-	return file_utils.download_file(filename)
-	
 @app.route('/delete_item/<filename>')
 @login_required
 def delete_item(filename):
-	file_utils.delete_item(filename)
+	parent_directory = expanduser("~") + app.config['RESOURCES-DIRECTORY'] + "/"
+	file_to_remove = os.path.join(parent_directory, filename)
+	is_file = os.path.isfile(file_to_remove)
+	if is_file:
+		os.chmod(file_to_remove, stat.S_IWRITE)
+		os.remove(file_to_remove)
+	else:
+		dir_to_remove = file_to_remove
+		files_in_directory_to_remove = os.listdir(dir_to_remove)
+
+		for file_chmod in files_in_directory_to_remove:
+			os.chmod(dir_to_remove + "/" + file_chmod, stat.S_IWRITE)
+		shutil.rmtree(dir_to_remove, ignore_errors=True)
+
+	flash('File has been removed!', 'success')
 	return redirect("/")
 
 @app.route('/')
-@app.route('/dir/<dir>')
-@app.route('/<dir>')
+@app.route('/dir/')
+@app.route('/dir/<path:dir>')
 @login_required
-def index(dir = None):
-	if dir is None:
-		files_in_directory = os.listdir(file_utils.app_directory)
-		browse_dir = file_utils.resource_directory()
-	else:
-		browse_dir = [file_utils.app_directory]
-		browse_dir.append(dir + "/")
-		dir_to_browse = ""
-		for list_item in browse_dir:
-			if len(browse_dir) > 1:
-				dir_to_browse += list_item
-		browse_dir =  dir_to_browse
+def index(dir = ""):
+	absolute_dir = expanduser("~") + app.config['RESOURCES-DIRECTORY'] + "/" + dir
 	
-	file_utils.app_directory = browse_dir
 	file_details = []
+	files_in_directory = os.listdir(absolute_dir)
 
+	if dir != "": 
+		head, tail = os.path.split(dir)
+		file_details.append({
+			"name": "..", 
+			"date": "", 
+			"size": "",
+			"is_dir": True,
+			"path": head
+		})
 
-	files_in_directory = os.listdir(browse_dir)
 	for file_name in files_in_directory:
-		full_path = browse_dir
-
-		dt = parse(str(time.ctime(os.path.getmtime(full_path))))
+		path = os.path.join(absolute_dir, file_name)
+		dt = parse(str(time.ctime(os.path.getmtime(path))))
 		parsed_date = dt.strftime('%Y-%m-%d %H:%M:%S')
-		file_size = os.stat(full_path).st_size
-		file_details.append([file_name, str(parsed_date),file_utils.sizeof_fmt(file_size)])
-		print("Tutaj 1 {} ".format(file_utils.app_directory))
-		print("Tutaj 2 {} ".format(browse_dir))
-		if file_utils.app_directory != browse_dir:
-			file_details.append(["../", str(parsed_date),file_utils.sizeof_fmt(file_size)])
-	return render_template('index.html', content = file_details)
+		file_size = os.stat(path).st_size
+		file_details.append({
+			"name": file_name, 
+			"date": str(parsed_date), 
+			"size": sizeof_fmt(file_size),
+			"is_dir": os.path.isdir(path),
+			"path": os.path.join(dir, file_name)
+		})
+
+	file_details.sort(key=lambda item: item['is_dir'], reverse=True)
+	return render_template('index.html', content = file_details, current_dir = dir)
+
+def allowed_file(filename):
+	 return '.' in filename and \
+		 filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
+
+@login_required
+@app.route('/upload', methods = ['GET', 'POST'])
+def upload_file():
+	
+	if request.method == 'POST':
+		dir_to_display = 'dir/' + request.form['dir_to_upload']
+
+		if 'file' not in request.files:
+			flash('Incorrect file part', 'warning')
+			return redirect(dir_to_display)
+
+		file = request.files['file']
+
+		if file.filename == '':
+			flash('Please choose a file to upload', 'warning')
+			return redirect(dir_to_display)
+
+		dir_to_save = expanduser("~") + app.config['RESOURCES-DIRECTORY'] + "/"
+		if request.form['dir_to_upload'] != "":
+			dir_to_save += request.form['dir_to_upload']
+
+		if file and allowed_file(file.filename):
+			file.save(os.path.join(dir_to_save, secure_filename(file.filename)))
+			flash('File has been added successfuly!', 'success')
+		else:
+			flash('This filetype is not allowed', 'warning')
+			return redirect(dir_to_display)
+
+
+	return redirect(dir_to_display)
 
 @login_manager.user_loader
 def load_user(user_id):

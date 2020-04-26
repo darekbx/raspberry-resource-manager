@@ -1,6 +1,8 @@
+from flask_wtf import Form
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, EqualTo, Length
+#from flask_wtf.file import FileField, FileAllowed, FileRequired
 
 from app.models import User
 
@@ -41,3 +43,13 @@ class RegisterForm(FlaskForm):
 			self.name.errors.append('User already exists')
 			return False
 		return True
+
+# class UploadForm(Form):
+
+#     validators = [
+#         FileRequired(message='There was no file!'),
+#         FileAllowed(['txt'], message='Must be a txt file!')
+#     ]
+
+#     input_file = FileField('', validators=validators)
+#     submit = SubmitField(label="Upload")
