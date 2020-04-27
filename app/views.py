@@ -108,10 +108,27 @@ def upload_file():
 			dir_to_save += request.form['dir_to_upload']
 
 		if file and allowed_file(file.filename):
-			file.save(os.path.join(dir_to_save, secure_filename(file.filename)))
-			flash('File has been added successfuly!', 'success')
+			files_in_directory = os.listdir(dir_to_save)
+
+			if file.filename.replace(" ", "_") in files_in_directory:
+				ts = time.gmtime()
+				timestamp = time.strftime("%H%M%S", ts)
+
+				filename_split = file.filename.rsplit(".", 1)
+				file.filename = filename_split[0] + "_" + timestamp + "." + filename_split[1]
+				flash("File has been saved successfuly as: {} ".format(file.filename), 'success')
+			else:
+				flash('File has been saved successfuly!', 'success')
+				
+			try:
+				file.save(os.path.join(dir_to_save, secure_filename(file.filename)))
+			except:
+				flash('An exception occured!', 'warning')
+
+			
 		else:
-			flash('This filetype is not allowed', 'warning')
+			filename_split = file.filename.rsplit(".", 1)[1]
+			flash('File extenstion ".{}" is not allowed!'.format(filename_split), 'warning')
 			return redirect(dir_to_display)
 
 
