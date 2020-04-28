@@ -26,13 +26,11 @@ def download(dir):
 	return send_file(os.path.join(absolute_dir, dir) , as_attachment=True)
 
 
-@app.route('/delete_item/<filename>')
+@app.route('/delete_item/<path:filename>')
 @login_required
 def delete_item(filename):
 	parent_directory = expanduser("~") + app.config['RESOURCES-DIRECTORY']
 	file_to_remove = os.path.join(parent_directory, filename)
-
-
 	
 	is_file = os.path.isfile(file_to_remove)
 	if is_file:
