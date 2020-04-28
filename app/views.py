@@ -29,10 +29,14 @@ def download(dir):
 @app.route('/delete_item/<filename>')
 @login_required
 def delete_item(filename):
-	parent_directory = expanduser("~") + app.config['RESOURCES-DIRECTORY'] + "/"
+	parent_directory = expanduser("~") + app.config['RESOURCES-DIRECTORY']
 	file_to_remove = os.path.join(parent_directory, filename)
+
+
+	
 	is_file = os.path.isfile(file_to_remove)
 	if is_file:
+		
 		os.chmod(file_to_remove, stat.S_IWRITE)
 		os.remove(file_to_remove)
 	else:
@@ -41,10 +45,17 @@ def delete_item(filename):
 
 		for file_chmod in files_in_directory_to_remove:
 			os.chmod(dir_to_remove + "/" + file_chmod, stat.S_IWRITE)
+		
 		shutil.rmtree(dir_to_remove, ignore_errors=True)
+	
+
+	if "\\" in filename:
+		dir_to_display = "/dir/" + filename.rsplit("\\", 1)[0]
+	else:
+		dir_to_display = "/"
 
 	flash('File has been removed!', 'success')
-	return redirect("/")
+	return redirect(dir_to_display)
 
 @app.route('/')
 @app.route('/dir/')
@@ -103,23 +114,23 @@ def upload_file():
 			flash('Please choose a file to upload', 'warning')
 			return redirect(dir_to_display)
 
-		dir_to_save = expanduser("~") + app.config['RESOURCES-DIRECTORY'] + "/"
+		dir_to_save = expanduser("~") + app.config['RESOURCES-DIRECTORY'] #+ "/"
 		if request.form['dir_to_upload'] != "":
 			dir_to_save += request.form['dir_to_upload']
 
 		if file and allowed_file(file.filename):
-			files_in_directory = os.listdir(dir_to_save)
 
-			if file.filename.replace(" ", "_") in files_in_directory:
+			if os.path.exists(dir_to_save + file.filename):	
+				print(dir_to_save + file.filename)											
 				ts = time.gmtime()
 				timestamp = time.strftime("%H%M%S", ts)
 
-				filename_split = file.filename.rsplit(".", 1)
-				file.filename = filename_split[0] + "_" + timestamp + "." + filename_split[1]
+				name, extension = os.path.splitext(file.filename)
+				file.filename = name + "_" + timestamp + "." + extension
 				flash("File has been saved successfuly as: {} ".format(file.filename), 'success')
 			else:
 				flash('File has been saved successfuly!', 'success')
-				
+
 			try:
 				file.save(os.path.join(dir_to_save, secure_filename(file.filename)))
 			except:
